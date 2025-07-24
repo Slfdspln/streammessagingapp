@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.datingapp2.x0"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.datingapp2.x0"
+  }
+}
