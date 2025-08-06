@@ -38,6 +38,9 @@ export const ChannelListScreen = ({ navigation }) => {
       Alert.alert('Error', 'Failed to sign out. Please try again.');
     }
   };
+  
+  // Separator component for channel list items
+  const ItemSeparator = () => <View style={styles.separator} />;
 
   return (
     <View style={styles.container}>
@@ -56,6 +59,7 @@ export const ChannelListScreen = ({ navigation }) => {
         sort={{ last_message_at: -1 }}
         Preview={CustomChannelPreview}
         onSelect={handleChannelSelect}
+        ItemSeparatorComponent={ItemSeparator}
       />
       
       <TouchableOpacity 
@@ -92,6 +96,11 @@ const styles = StyleSheet.create({
   signOutText: {
     color: '#006AFF',
     fontWeight: '600',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginLeft: 80, // Indent it to align with the text
   },
   newConversationButton: {
     position: 'absolute',
