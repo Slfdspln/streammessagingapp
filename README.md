@@ -61,3 +61,4 @@ This is a basic proof of concept. The next steps in developing the chat feature 
 -   **UI Customization**: Theming the components to match the dating app's brand.
 -   **Dynamic Channel Creation**: Programmatically creating new chat channels when two users "match".
 -   **User Management**: Integrating with the app's own user authentication system instead of using a hardcoded user.
+# app
