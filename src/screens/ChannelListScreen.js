@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, Alert } from 'react-native';
-import { ChannelList, ChannelPreviewMessenger } from 'stream-chat-react-native';
+import { ChannelList } from 'stream-chat-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { CustomChannelPreview } from '../components/CustomChannelPreview';
 
 // This screen component is responsible for displaying the list of conversations.
 export const ChannelListScreen = ({ navigation }) => {
@@ -53,7 +54,7 @@ export const ChannelListScreen = ({ navigation }) => {
           type: 'messaging',
         }}
         sort={{ last_message_at: -1 }}
-        Preview={ChannelPreviewMessenger}
+        Preview={CustomChannelPreview}
         onSelect={handleChannelSelect}
       />
       
