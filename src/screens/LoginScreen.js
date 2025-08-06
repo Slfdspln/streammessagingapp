@@ -69,6 +69,8 @@ export const LoginScreen = ({ navigation }) => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            textContentType="oneTimeCode"
+            autoCapitalize="none"
           />
         </View>
         

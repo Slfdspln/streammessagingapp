@@ -101,6 +101,8 @@ export const SignUpScreen = ({ navigation }) => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              textContentType="oneTimeCode"
+              autoCapitalize="none"
             />
           </View>
           
@@ -112,6 +114,8 @@ export const SignUpScreen = ({ navigation }) => {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
+              textContentType="oneTimeCode"
+              autoCapitalize="none"
             />
           </View>
           
