@@ -41,6 +41,17 @@ export const ChannelListScreen = ({ navigation }) => {
   
   // Separator component for channel list items
   const ItemSeparator = () => <View style={styles.separator} />;
+  
+  // Empty state component for when there are no channels
+  const EmptyState = () => (
+    <View style={styles.emptyStateContainer}>
+      <Ionicons name="chatbubble-outline" size={50} color="#ccc" />
+      <Text style={styles.emptyStateTitle}>No conversations yet</Text>
+      <Text style={styles.emptyStateText}>
+        Start one by tapping the new message icon below!
+      </Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -60,6 +71,7 @@ export const ChannelListScreen = ({ navigation }) => {
         Preview={CustomChannelPreview}
         onSelect={handleChannelSelect}
         ItemSeparatorComponent={ItemSeparator}
+        EmptyStateIndicator={EmptyState}
       />
       
       <TouchableOpacity 
@@ -101,6 +113,25 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#e0e0e0',
     marginLeft: 80, // Indent it to align with the text
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 15,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    maxWidth: '80%',
   },
   newConversationButton: {
     position: 'absolute',
