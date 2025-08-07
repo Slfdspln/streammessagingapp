@@ -15,57 +15,69 @@ import { NewConversationScreen } from '../screens/NewConversationScreen';
 
 const Stack = createNativeStackNavigator();
 
+// Common header styles for app screens
+const appHeaderStyle = {
+  headerStyle: {
+    backgroundColor: '#006AFF',
+  },
+  headerTintColor: '#fff',
+};
+
 export const AppNavigator = () => {
   const { user, loading } = useAuth();
   
+  // Show loading screen while authentication state is being determined
   if (loading) {
     return <AuthLoadingScreen />;
   }
   
   return (
     <NavigationContainer>
-      {user ? (
-        <Stack.Navigator>
-          <Stack.Screen 
-            name="ChannelList" 
-            component={ChannelListScreen} 
-            options={{ 
-              title: 'Conversations',
-              headerStyle: {
-                backgroundColor: '#006AFF',
-              },
-              headerTintColor: '#fff',
-            }}
-          />
-          <Stack.Screen 
-            name="ChannelScreen" 
-            component={ChannelScreen} 
-            options={({ route }) => ({ 
-              title: route.params?.channelName || 'Chat',
-              headerStyle: {
-                backgroundColor: '#006AFF',
-              },
-              headerTintColor: '#fff',
-            })}
-          />
-          <Stack.Screen 
-            name="NewConversation" 
-            component={NewConversationScreen} 
-            options={{ 
-              title: 'New Conversation',
-              headerStyle: {
-                backgroundColor: '#006AFF',
-              },
-              headerTintColor: '#fff',
-            }}
-          />
-        </Stack.Navigator>
-      ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-        </Stack.Navigator>
-      )}
+      <Stack.Navigator>
+        {user ? (
+          // App screens - available after login
+          <>
+            <Stack.Screen 
+              name="ChannelList" 
+              component={ChannelListScreen} 
+              options={{ 
+                title: 'Conversations',
+                ...appHeaderStyle
+              }}
+            />
+            <Stack.Screen 
+              name="ChannelScreen" 
+              component={ChannelScreen} 
+              options={({ route }) => ({ 
+                title: route.params?.channelName || 'Chat',
+                ...appHeaderStyle
+              })}
+            />
+            <Stack.Screen 
+              name="NewConversation" 
+              component={NewConversationScreen} 
+              options={{ 
+                title: 'New Conversation',
+                ...appHeaderStyle
+              }}
+            />
+          </>
+        ) : (
+          // Auth screens
+          <>
+            <Stack.Screen 
+              name="Login" 
+              component={LoginScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="SignUp" 
+              component={SignUpScreen} 
+              options={{ headerShown: false }} 
+            />
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

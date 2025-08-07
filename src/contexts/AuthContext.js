@@ -1,7 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { StreamChat } from 'stream-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Import centralized Stream Chat client
+import { client as streamChatClient } from '../utils/chat';
 
 // Initialize Supabase client
 const supabaseUrl = 'https://mzfancltgkwbidxvcrzz.supabase.co';
@@ -15,15 +17,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Initialize Stream Chat client
-const streamChatClient = StreamChat.getInstance('yw2nup36tnpk');
-
 // Create the auth context
 export const AuthContext = createContext({
   user: null,
   session: null,
-  streamToken: null,
-  streamClient: null,
+  isReady: false,
   loading: true,
   signUp: async () => {},
   signIn: async () => {},
@@ -34,7 +32,7 @@ export const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
-  const [streamToken, setStreamToken] = useState(null);
+  const [isReady, setIsReady] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Check for an existing session on load
@@ -54,6 +52,7 @@ export const AuthProvider = ({ children }) => {
         console.error('Error loading session:', error.message);
       } finally {
         setLoading(false);
+        setIsReady(true);
       }
     };
     
@@ -98,8 +97,6 @@ export const AuthProvider = ({ children }) => {
         },
         data.token
       );
-      
-      setStreamToken(data.token);
     } catch (error) {
       console.error('Error connecting to Stream Chat:', error.message);
     }
@@ -111,7 +108,6 @@ export const AuthProvider = ({ children }) => {
       if (streamChatClient.userID) {
         await streamChatClient.disconnectUser();
       }
-      setStreamToken(null);
     } catch (error) {
       console.error('Error disconnecting from Stream Chat:', error.message);
     }
@@ -180,9 +176,9 @@ export const AuthProvider = ({ children }) => {
   // Auth context value
   const value = {
     user,
+    userId: user?.id,
     session,
-    streamToken,
-    streamClient: streamChatClient,
+    isReady,
     loading,
     signUp,
     signIn,
