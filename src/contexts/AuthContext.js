@@ -1,9 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StreamChat } from 'stream-chat';
 
-// Import centralized Stream Chat client
-import { client as streamChatClient } from '../utils/chat';
+// Stream Chat API key
+const chatApiKey = 'yw2nup36tnpk';
+
+// Initialize Stream Chat client directly in AuthContext
+const streamChatClient = StreamChat.getInstance(chatApiKey);
 
 // Initialize Supabase client
 const supabaseUrl = 'https://mzfancltgkwbidxvcrzz.supabase.co';
@@ -23,6 +27,7 @@ export const AuthContext = createContext({
   session: null,
   isReady: false,
   loading: true,
+  client: null, // Stream Chat client
   signUp: async () => {},
   signIn: async () => {},
   signOut: async () => {},
@@ -180,6 +185,7 @@ export const AuthProvider = ({ children }) => {
     session,
     isReady,
     loading,
+    client: streamChatClient, // Expose the Stream Chat client
     signUp,
     signIn,
     signOut,
