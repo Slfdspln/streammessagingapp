@@ -28,14 +28,21 @@ export default function App() {
 
 // This component accesses the auth context and conditionally renders the app
 const AppContent = () => {
-  const { user, loading } = useAuth();
+  const { user, isReady } = useAuth();
   
-  // If loading or no user, just render the navigator (handles auth screens)
-  if (loading || !user) {
+  // Wait until auth state is fully determined before rendering anything
+  if (!isReady) {
+    // You could return a splash screen here
+    return null;
+  }
+  
+  // If no user (not logged in), render the navigator without Chat provider
+  // This will show auth screens based on the navigation logic
+  if (!user) {
     return <AppNavigator />;
   }
   
-  // Only wrap with Chat provider when user is logged in
+  // Only wrap with Chat provider when user is logged in and auth is ready
   // Using the centralized streamChatClient from utils/chat.js
   return (
     <OverlayProvider i18nInstance={streami18n} style={datingAppTheme}>
