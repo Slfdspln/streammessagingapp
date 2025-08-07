@@ -7,11 +7,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { LoginScreen } from '../screens/LoginScreen';
 import { SignUpScreen } from '../screens/SignUpScreen';
 import { AuthLoadingScreen } from '../screens/AuthLoadingScreen';
+import { SignOutScreen } from '../screens/SignOutScreen';
 
 // App Screens
-import { ChannelListScreen } from '../screens/ChannelListScreen';
 import { ChannelScreen } from '../screens/ChannelScreen';
 import { NewConversationScreen } from '../screens/NewConversationScreen';
+
+// Import the MainTabNavigator
+import MainTabNavigator from './MainTabNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,11 +41,10 @@ export const AppNavigator = () => {
           // App screens - available after login
           <>
             <Stack.Screen 
-              name="ChannelList" 
-              component={ChannelListScreen} 
+              name="Main" 
+              component={MainTabNavigator} 
               options={{ 
-                title: 'Conversations',
-                ...appHeaderStyle
+                headerShown: false
               }}
             />
             <Stack.Screen 
@@ -59,6 +61,13 @@ export const AppNavigator = () => {
               options={{ 
                 title: 'New Conversation',
                 ...appHeaderStyle
+              }}
+            />
+            <Stack.Screen 
+              name="SignOut" 
+              component={SignOutScreen} 
+              options={{ 
+                headerShown: false
               }}
             />
           </>
