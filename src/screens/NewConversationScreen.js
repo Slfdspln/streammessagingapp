@@ -14,7 +14,7 @@ export const NewConversationScreen = ({ navigation }) => {
   const [channelName, setChannelName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { user, streamClient } = useAuth();
+  const { user, client } = useAuth();
   
   const handleCreateChannel = async () => {
     if (!channelName.trim()) {
@@ -29,7 +29,7 @@ export const NewConversationScreen = ({ navigation }) => {
       const channelId = `${user.id}-${Date.now()}`;
       
       // Create a new channel with just the current user
-      const channel = streamClient.channel('messaging', channelId, {
+      const channel = client.channel('messaging', channelId, {
         name: channelName,
         members: [user.id],
         created_by_id: user.id,
