@@ -7,7 +7,7 @@ import { CustomChannelPreview } from '../components/CustomChannelPreview';
 
 // This screen component is responsible for displaying the list of conversations.
 export const ChannelListScreen = ({ navigation }) => {
-  const { user, streamClient, signOut } = useAuth();
+  const { user, client, signOut } = useAuth();
 
   // Handle channel selection - this will be passed to the ChannelList
   const handleChannelSelect = useCallback(

@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Channel, MessageList, MessageInput } from 'stream-chat-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
+
+// Import auth context to get the Stream client
+import { useAuth } from '../contexts/AuthContext';
 
 // Import only the custom message component
 import { CustomMessage } from '../components/CustomMessage';
@@ -8,11 +12,40 @@ import { CustomMessage } from '../components/CustomMessage';
 // This screen component is responsible for displaying the messages for a single channel.
 export const ChannelScreen = ({ route }) => {
   const { channelId, channelName } = route.params;
+  const { client } = useAuth();
+  const [channel, setChannel] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Let the Stream SDK handle channel state and loading internally
+  useEffect(() => {
+    // Get the channel from the client using the channelId
+    if (client && channelId) {
+      const fetchChannel = async () => {
+        try {
+          const channel = client.channel('messaging', channelId);
+          await channel.watch();
+          setChannel(channel);
+        } catch (error) {
+          console.error('Error fetching channel:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchChannel();
+    }
+  }, [client, channelId]);
+
+  if (loading || !channel) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#006AFF" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Channel channelId={channelId}>
+      <Channel channel={channel}>
         {/* We are still using our custom message bubble */}
         <MessageList 
           MessageSimple={CustomMessage} 
@@ -30,5 +63,13 @@ export const ChannelScreen = ({ route }) => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 

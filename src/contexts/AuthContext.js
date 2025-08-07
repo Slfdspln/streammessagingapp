@@ -86,22 +86,43 @@ export const AuthProvider = ({ children }) => {
   // Connect to Stream Chat with a token from our Edge Function
   const connectStreamChat = async (session) => {
     try {
-      // Call our Edge Function to get a Stream token
-      const { data, error } = await supabase.functions.invoke('stream-generate-token', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
+      // Try to call our Edge Function to get a Stream token
+      try {
+        const { data, error } = await supabase.functions.invoke('stream-generate-token', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        
+        if (!error) {
+          // Connect to Stream Chat with the token from Edge Function
+          await streamChatClient.connectUser(
+            {
+              id: session.user.id,
+              name: session.user.user_metadata?.full_name || session.user.email,
+              email: session.user.email,
+            },
+            data.token
+          );
+          console.log('Connected to Stream Chat using Edge Function token');
+          return; // Successfully connected, exit the function
+        }
+        // If there's an error, we'll fall through to the fallback method
+        console.warn('Edge Function error, using fallback authentication:', error.message);
+      } catch (edgeFunctionError) {
+        console.warn('Edge Function unavailable, using fallback authentication:', edgeFunctionError.message);
+      }
       
-      if (error) throw error;
-      
-      // Connect to Stream Chat with the token
+      // FALLBACK: Use development token generation
+      // NOTE: This is for DEVELOPMENT ONLY and should be replaced with proper Edge Function in production
+      console.log('Using fallback authentication method for development');
       await streamChatClient.connectUser(
         {
           id: session.user.id,
           name: session.user.user_metadata?.full_name || session.user.email,
           email: session.user.email,
         },
-        data.token
+        streamChatClient.devToken(session.user.id)
       );
+      console.log('Connected to Stream Chat using development token');
     } catch (error) {
       console.error('Error connecting to Stream Chat:', error.message);
     }

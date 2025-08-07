@@ -38,7 +38,7 @@ export const NewConversationScreen = ({ navigation }) => {
       await channel.create();
       
       // Navigate to the new channel
-      navigation.replace('ChannelScreen', { 
+      navigation.navigate('ChannelScreen', { 
         channelId: channel.id,
         channelName: channel.data.name,
       });
