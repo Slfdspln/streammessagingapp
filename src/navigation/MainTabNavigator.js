@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TouchableOpacity } from 'react-native';
 import { ChannelListScreen } from '../screens/ChannelListScreen';
 import DiscoverScreen from '../screens/DiscoverScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -51,7 +52,22 @@ const MainTabNavigator = () => {
       <Tab.Screen 
         name="Discover" 
         component={DiscoverScreen} 
-        options={{ headerTitle: 'Discover Users' }}
+        options={{
+          headerTitle: 'Discover Users',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{
+          headerTitle: 'My Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );

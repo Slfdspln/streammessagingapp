@@ -6,11 +6,12 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 // Import auth context to get the Stream client
 import { useAuth } from '../contexts/AuthContext';
 
-// Import only the custom message component
+// Import custom components
 import { CustomMessage } from '../components/CustomMessage';
+import CustomChatHeader from '../components/CustomChatHeader';
 
 // This screen component is responsible for displaying the messages for a single channel.
-export const ChannelScreen = ({ route }) => {
+export const ChannelScreen = ({ route, navigation }) => {
   const { channelId, channelName } = route.params;
   const { client } = useAuth();
   const [channel, setChannel] = useState(null);
@@ -45,7 +46,14 @@ export const ChannelScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Channel channel={channel}>
+      <Channel 
+        channel={channel}
+        Header={() => (
+          <CustomChatHeader 
+            onBackPress={() => navigation.goBack()} 
+          />
+        )}
+      >
         {/* We are still using our custom message bubble */}
         <MessageList 
           MessageSimple={CustomMessage} 
