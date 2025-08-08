@@ -23,7 +23,8 @@ export const ChannelScreen = ({ route, navigation }) => {
       const fetchChannel = async () => {
         try {
           const channel = client.channel('messaging', channelId);
-          await channel.watch();
+          // Enable presence tracking for online status and last active times
+          await channel.watch({ presence: true });
           setChannel(channel);
         } catch (error) {
           console.error('Error fetching channel:', error);
@@ -31,7 +32,7 @@ export const ChannelScreen = ({ route, navigation }) => {
           setLoading(false);
         }
       };
-      
+
       fetchChannel();
     }
   }, [client, channelId]);
@@ -46,19 +47,13 @@ export const ChannelScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Channel 
+      <Channel
         channel={channel}
-        Header={() => (
-          <CustomChatHeader 
-            onBackPress={() => navigation.goBack()} 
-          />
-        )}
+        Header={() => <CustomChatHeader onBackPress={() => navigation.goBack()} />}
       >
         {/* We are still using our custom message bubble */}
-        <MessageList 
-          MessageSimple={CustomMessage} 
-        />
-        
+        <MessageList MessageSimple={CustomMessage} />
+
         {/* Use the standard MessageInput component from Stream with keyboard settings */}
         <MessageInput
           additionalTextInputProps={{
@@ -79,5 +74,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-

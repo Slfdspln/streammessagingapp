@@ -11,12 +11,12 @@ export const ChannelListScreen = ({ navigation }) => {
 
   // Handle channel selection - this will be passed to the ChannelList
   const handleChannelSelect = useCallback(
-    (channel) => {
+    channel => {
       if (channel?.id) {
         console.log('Channel selected:', channel.id);
-        navigation.navigate('ChannelScreen', { 
+        navigation.navigate('ChannelScreen', {
           channelId: channel.id,
-          channelName: channel.data?.name || 'Chat'
+          channelName: channel.data?.name || 'Chat',
         });
       } else {
         console.error('No channel id available');
@@ -24,12 +24,12 @@ export const ChannelListScreen = ({ navigation }) => {
     },
     [navigation]
   );
-  
+
   // Function to handle creating a new conversation
   const handleNewConversation = () => {
     navigation.navigate('NewConversation');
   };
-  
+
   // Function to handle sign out
   const handleSignOut = async () => {
     try {
@@ -38,40 +38,40 @@ export const ChannelListScreen = ({ navigation }) => {
       Alert.alert('Error', 'Failed to sign out. Please try again.');
     }
   };
-  
+
   // Separator component for channel list items
   const ItemSeparator = () => <View style={styles.separator} />;
-  
+
   // Empty state component for when there are no channels
   const EmptyState = () => (
     <View style={styles.emptyStateContainer}>
       <Ionicons name="chatbubble-outline" size={50} color="#ccc" />
       <Text style={styles.emptyStateTitle}>No conversations yet</Text>
-      <Text style={styles.emptyStateText}>
-        Start one by tapping the new message icon below!
-      </Text>
+      <Text style={styles.emptyStateText}>Start one by tapping the new message icon below!</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      
       <ChannelList
         filters={{
           members: { $in: [user?.id] },
           type: 'messaging',
         }}
         sort={{ last_message_at: -1 }}
+        options={{
+          // Enable presence tracking for online status and last active times
+          presence: true,
+          state: true,
+          watch: true,
+        }}
         Preview={CustomChannelPreview}
         onSelect={handleChannelSelect}
         ItemSeparatorComponent={ItemSeparator}
         EmptyStateIndicator={EmptyState}
       />
-      
-      <TouchableOpacity 
-        style={styles.newConversationButton}
-        onPress={handleNewConversation}
-      >
+
+      <TouchableOpacity style={styles.newConversationButton} onPress={handleNewConversation}>
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
     </View>

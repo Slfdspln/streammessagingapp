@@ -3,16 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StreamChat } from 'stream-chat';
 
-// Stream Chat API key
-const chatApiKey = 'yw2nup36tnpk';
+// Import environment variables from config
+import { SUPABASE_URL, SUPABASE_ANON_KEY, STREAM_CHAT_API_KEY } from '../utils/config';
 
 // Initialize Stream Chat client directly in AuthContext
-const streamChatClient = StreamChat.getInstance(chatApiKey);
+const streamChatClient = StreamChat.getInstance(STREAM_CHAT_API_KEY);
 
 // Initialize Supabase client
-const supabaseUrl = 'https://mzfancltgkwbidxvcrzz.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16ZmFuY2x0Z2t3YmlkeHZjcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MTAxOTgsImV4cCI6MjA2ODI4NjE5OH0.y6ZrWOIckoyPyrrfsDSF2yJxlfJqsrWKxnpU6rjHZW4';
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
@@ -44,12 +42,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
         if (error) throw error;
-        
+
         setSession(session);
         setUser(session?.user || null);
-        
+
         if (session?.user) {
           await connectStreamChat(session);
         }
@@ -60,74 +61,64 @@ export const AuthProvider = ({ children }) => {
         setIsReady(true);
       }
     };
-    
+
     loadSession();
-    
+
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user || null);
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          await connectStreamChat(session);
-        } else if (event === 'SIGNED_OUT') {
-          await disconnectStreamChat();
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        await connectStreamChat(session);
+      } else if (event === 'SIGNED_OUT') {
+        await disconnectStreamChat();
       }
-    );
-    
+    });
+
     // Clean up subscription
     return () => {
       subscription?.unsubscribe();
     };
   }, []);
-  
+
   // Connect to Stream Chat with a token from our Edge Function
-  const connectStreamChat = async (session) => {
+  const connectStreamChat = async session => {
     try {
-      // Try to call our Edge Function to get a Stream token
-      try {
-        const { data, error } = await supabase.functions.invoke('stream-generate-token', {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        
-        if (!error) {
-          // Connect to Stream Chat with the token from Edge Function
-          await streamChatClient.connectUser(
-            {
-              id: session.user.id,
-              name: session.user.user_metadata?.full_name || session.user.email,
-              email: session.user.email,
-            },
-            data.token
-          );
-          console.log('Connected to Stream Chat using Edge Function token');
-          return; // Successfully connected, exit the function
-        }
-        // If there's an error, we'll fall through to the fallback method
-        console.warn('Edge Function error, using fallback authentication:', error.message);
-      } catch (edgeFunctionError) {
-        console.warn('Edge Function unavailable, using fallback authentication:', edgeFunctionError.message);
+      // Call our Edge Function to get a secure Stream token
+      const { data, error } = await supabase.functions.invoke('stream-generate-token', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) {
+        console.error('Error getting Stream Chat token from Edge Function:', error.message);
+        throw new Error(`Failed to get secure token: ${error.message}`);
       }
-      
-      // FALLBACK: Use development token generation
-      // NOTE: This is for DEVELOPMENT ONLY and should be replaced with proper Edge Function in production
-      console.log('Using fallback authentication method for development');
+
+      if (!data || !data.token) {
+        console.error('Invalid response from Edge Function: Missing token');
+        throw new Error('Invalid token response from server');
+      }
+
+      // Connect to Stream Chat with the token from Edge Function
       await streamChatClient.connectUser(
         {
           id: session.user.id,
           name: session.user.user_metadata?.full_name || session.user.email,
           email: session.user.email,
         },
-        streamChatClient.devToken(session.user.id)
+        data.token
       );
-      console.log('Connected to Stream Chat using development token');
+      console.log('Connected to Stream Chat using secure token');
     } catch (error) {
       console.error('Error connecting to Stream Chat:', error.message);
+      // Show an alert or handle the error appropriately in your UI
+      // We don't fall back to insecure methods - better to fail securely
     }
   };
-  
+
   // Disconnect from Stream Chat
   const disconnectStreamChat = async () => {
     try {
@@ -138,7 +129,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Error disconnecting from Stream Chat:', error.message);
     }
   };
-  
+
   // Sign up with email and password
   const signUp = async (email, password, fullName) => {
     try {
@@ -152,9 +143,9 @@ export const AuthProvider = ({ children }) => {
           },
         },
       });
-      
+
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (error) {
       return { data: null, error };
@@ -162,7 +153,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  
+
   // Sign in with email and password
   const signIn = async (email, password) => {
     try {
@@ -171,9 +162,9 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      
+
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (error) {
       return { data: null, error };
@@ -181,16 +172,16 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  
+
   // Sign out
   const signOut = async () => {
     try {
       setLoading(true);
       await disconnectStreamChat();
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) throw error;
-      
+
       return { error: null };
     } catch (error) {
       return { error };
@@ -198,7 +189,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  
+
   // Auth context value
   const value = {
     user,
@@ -211,12 +202,8 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
   };
-  
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 // Custom hook to use the auth context
