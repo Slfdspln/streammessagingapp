@@ -4,7 +4,6 @@ module.exports = ({ config }) => ({
   ...config,
   plugins: [
     "react-native-video",
-    "expo-image-picker",
     "expo-secure-store"
   ],
   name: 'DatingApp20',
@@ -28,6 +27,9 @@ module.exports = ({ config }) => ({
     bundleIdentifier: 'com.yourcompany.datingapp',
     scheme: 'datingapp20',
     infoPlist: {
+      NSPhotoLibraryUsageDescription: "We need access to your photos so you can add profile pictures.",
+      NSPhotoLibraryAddUsageDescription: "We need permission to save edited photos to your library.",
+      NSCameraUsageDescription: "We need access to your camera to take a profile photo.",
       NSAppTransportSecurity: {
         NSAllowsLocalNetworking: true,
         NSExceptionDomains: {
@@ -86,6 +88,7 @@ module.exports = ({ config }) => ({
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     STREAM_CHAT_API_KEY: process.env.STREAM_CHAT_API_KEY,
     APP_ENV: process.env.APP_ENV || 'development',
+    STORAGE_BUCKET: 'profile-photos',
     eas: {
       projectId: 'your-project-id',
     },

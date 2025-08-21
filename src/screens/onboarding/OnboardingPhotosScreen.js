@@ -13,9 +13,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import LinearGradient from 'react-native-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../contexts/AuthContext';
 import { useOnboarding } from '../../contexts/OnboardingContext';
+import { pickProfilePhotos } from '../../utils/pickImages';
+import { uploadPhotoToSupabase } from '../../utils/uploadToSupabase';
+import { saveProfilePhotos } from '../../utils/profileUtils';
+import { supabase } from '../../utils/supabase';
 
 const OnboardingPhotosScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -26,44 +29,30 @@ const OnboardingPhotosScreen = ({ navigation }) => {
 
   const MAX_PHOTOS = 6;
 
-  const requestPermission = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant camera roll permissions to add photos.', [
-        { text: 'OK' },
-      ]);
-      return false;
-    }
-    return true;
-  };
-
   const pickImage = async index => {
-    const hasPermission = await requestPermission();
-    if (!hasPermission) return;
-
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 5],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const selectedImage = result.assets[0];
-
-        // If replacing an existing photo
-        if (index !== undefined && index < photos.length) {
-          const newPhotos = [...photos];
-          newPhotos[index] = selectedImage.uri;
-          setPhotos(newPhotos);
-        } else {
-          // Adding a new photo
-          setPhotos([...photos, selectedImage.uri]);
+      // Use our hardened photo picker function
+      const selectedPhotos = await pickProfilePhotos();
+      
+      if (selectedPhotos.length === 0) return;
+      
+      const selectedPhoto = selectedPhotos[0];
+      
+      // If replacing an existing photo
+      if (index !== undefined && index < photos.length) {
+        const newPhotos = [...photos];
+        newPhotos[index] = selectedPhoto.uri;
+        setPhotos(newPhotos);
+      } else {
+        // Adding a new photo
+        if (photos.length >= MAX_PHOTOS) {
+          Alert.alert('Maximum Photos', `You can only add up to ${MAX_PHOTOS} photos.`);
+          return;
         }
+        setPhotos([...photos, selectedPhoto.uri]);
       }
     } catch (error) {
-      console.log('Error picking image:', error);
+      console.error('Error picking image:', error);
       Alert.alert('Error', 'Failed to select image. Please try again.');
     }
   };
@@ -80,17 +69,37 @@ const OnboardingPhotosScreen = ({ navigation }) => {
       return;
     }
 
-    // Save photos to context
+    // Save photos to context and upload to Supabase Storage
     setUploading(true);
 
     try {
-      // In a real app, you would upload photos to storage here
-      // For now, we'll just save the URIs to the context
+      // First save to context (temporary storage while completing onboarding)
       updateOnboardingData({ photos });
+      
+      const photoUrls = [];
+      
+      // Convert local URIs to file objects for upload
+      const photoFiles = photos.map((uri, index) => ({
+        uri,
+        name: `photo_${index}_${Date.now()}.jpg`,
+        type: 'image/jpeg'
+      }));
+      
+      // Upload each photo to Supabase Storage
+      for (const photoFile of photoFiles) {
+        const publicUrl = await uploadPhotoToSupabase(photoFile);
+        photoUrls.push(publicUrl);
+      }
+      
+      // Save the public URLs to the user's profile
+      if (user?.id && photoUrls.length > 0) {
+        await saveProfilePhotos(photoUrls, user.id);
+      }
 
       // Navigate to next screen
       navigation.navigate('Interests');
     } catch (error) {
+      console.error('Error saving photos:', error);
       Alert.alert('Error', 'Failed to save photos. Please try again.');
     } finally {
       setUploading(false);
@@ -104,7 +113,11 @@ const OnboardingPhotosScreen = ({ navigation }) => {
     for (let i = 0; i < photos.length; i++) {
       slots.push(
         <View key={`photo-${i}`} style={styles.photoContainer}>
-          <Image source={{ uri: photos[i] }} style={styles.photo} />
+          <Image 
+            source={{ uri: photos[i] }} 
+            style={styles.photo} 
+            resizeMode="cover"
+          />
           <TouchableOpacity style={styles.editButton} onPress={() => pickImage(i)}>
             <MaterialIcons name="edit" size={20} color="#fff" />
           </TouchableOpacity>

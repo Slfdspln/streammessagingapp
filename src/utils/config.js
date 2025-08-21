@@ -11,6 +11,7 @@ const getEnv = () => {
     supabaseAnonKey: extra.SUPABASE_ANON_KEY,
     streamChatApiKey: extra.STREAM_CHAT_API_KEY,
     appEnv: extra.APP_ENV || 'production',
+    storageBucket: extra.STORAGE_BUCKET || 'profile-photos',
   };
 };
 
@@ -22,6 +23,7 @@ export const SUPABASE_URL = ENV.supabaseUrl;
 export const SUPABASE_ANON_KEY = ENV.supabaseAnonKey;
 export const STREAM_CHAT_API_KEY = ENV.streamChatApiKey;
 export const APP_ENV = ENV.appEnv;
+export const STORAGE_BUCKET = ENV.storageBucket;
 
 // Log environment variables for debugging
 if (APP_ENV === 'development') {
@@ -29,7 +31,8 @@ if (APP_ENV === 'development') {
     SUPABASE_URL, 
     SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? '***' : undefined, 
     STREAM_CHAT_API_KEY: STREAM_CHAT_API_KEY ? '***' : undefined,
-    APP_ENV
+    APP_ENV,
+    STORAGE_BUCKET
   });
 }
 

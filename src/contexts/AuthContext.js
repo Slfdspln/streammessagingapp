@@ -141,18 +141,47 @@ export const AuthProvider = ({ children }) => {
   // Check if user has completed onboarding
   const checkOnboardingStatus = async userId => {
     try {
+      // First check if the profiles table exists and has the onboarding_completed column
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      // If the profile doesn't exist yet, create it
+      if (!profileData) {
+        // Create profile with default onboarding status
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({ id: userId, onboarding_completed: false });
+          
+        if (insertError) {
+          // If the table doesn't exist or column is missing, we'll handle it below
+          console.log('Could not create profile, may need to create table:', insertError.message);
+        } else {
+          setIsOnboarded(false);
+          return false;
+        }
+      }
+      
+      // Try to get onboarding status
       const { data, error } = await supabase
         .from('profiles')
         .select('onboarding_completed')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        // If error is about missing column, we'll assume onboarding is not completed
+        console.log('Error checking onboarding status:', error.message);
+        setIsOnboarded(false);
+        return false;
+      }
 
       setIsOnboarded(data?.onboarding_completed || false);
       return data?.onboarding_completed || false;
     } catch (error) {
-      console.error('Error checking onboarding status:', error.message);
+      console.log('Error checking onboarding status:', error.message);
       return false;
     }
   };
