@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OverlayProvider, Chat } from 'stream-chat-react-native';
 import { StreamChat } from 'stream-chat';
@@ -8,6 +8,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Import theme
 import { datingAppTheme, streami18n } from './src/theme';
+
+// Import cleanup utility
+import { clearOldSupabaseSession } from './src/utils/clearOldSession';
 
 // Import auth and navigation
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
@@ -21,6 +24,11 @@ import { AppStreamChatGenerics } from './src/types/stream-chat';
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
 
 export default function App(): React.ReactElement {
+  // Clear old Supabase session from SecureStore on app startup
+  useEffect(() => {
+    clearOldSupabaseSession();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
