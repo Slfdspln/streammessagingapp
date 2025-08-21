@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }) => {
       // Call our Edge Function to get a secure Stream token
       const { data, error } = await supabase.functions.invoke('stream-generate-token', {
         headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { user_id: session.user.id }, // Send user_id in the request body
       });
 
       if (error) {
