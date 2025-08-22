@@ -35,7 +35,7 @@
     "react-native-svg": "15.11.2",
     "react-native-video": "^6.16.1",
     "react-native-web": "0.20.0",
-    "stream-chat": "9.11.0",
+    "stream-chat": "9.17.0",
     "stream-chat-react-native": "8.2.0"
   },
   "name": "dating-app-2.0",
