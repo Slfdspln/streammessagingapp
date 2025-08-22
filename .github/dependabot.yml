@@ -1,0 +1,33 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Limit the number of open PRs to avoid overwhelming
+    open-pull-requests-limit: 10
+    # Specify labels for npm pull requests
+    labels:
+      - "npm"
+      - "dependencies"
+    # Set reviewers for pull requests
+    reviewers:
+      - "repo-owner"
+    # Ignore updates to certain packages
+    ignore:
+      # Ignore major version updates for React Native to avoid breaking changes
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major"]
+      # Ignore major version updates for Expo to avoid breaking changes
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major"]
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "github-actions"
+      - "dependencies"

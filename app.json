@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "DatingApp20",
+    "slug": "DatingApp20",
+    "scheme": "datingapp20",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.datingapp2.x0"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.datingapp2.x0"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "plugins": [
+      "expo-dev-client",
+      "expo-image-picker"
+    ],
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    }
+  }
+}
